@@ -1,0 +1,73 @@
+name: 🐛 Bug report
+description: Something in JARVIS isn't working as expected.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug! The more detail below, the faster it gets fixed.
+        Please **redact any API keys, file paths, or personal data** from logs.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, and what you expected instead.
+      placeholder: I asked JARVIS to generate an image and the Media Bay stayed empty…
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: How can we trigger it?
+      placeholder: |
+        1. Launch with run.bat
+        2. Say "generate a red car"
+        3. Backend logs show …
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part?
+      options:
+        - Voice / STT / TTS
+        - Image generation (FLUX)
+        - 3D generation (TRELLIS / Hunyuan3D)
+        - Vision / webcam
+        - Web / browser tools
+        - Memory
+        - HUD / frontend
+        - Backend / orchestrator / tools
+        - Setup / install
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: LLM provider + model
+      description: What's in config.yaml (provider, endpoint host, model name)?
+      placeholder: "ollama · http://localhost:11434/v1 · qwen2.5:14b"
+    validations:
+      required: true
+
+  - type: input
+    id: gpu
+    attributes:
+      label: OS + GPU
+      placeholder: "Windows 11 · RTX 4080 16GB (or: no GPU)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Backend console output or `data/logs/actions.jsonl` lines. Redact secrets.
+      render: shell

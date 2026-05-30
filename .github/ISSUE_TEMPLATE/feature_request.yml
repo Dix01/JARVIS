@@ -1,0 +1,46 @@
+name: 💡 Feature / tool request
+description: Suggest a new capability, tool, panel, or improvement.
+title: "[Idea]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Got an idea to make JARVIS more capable or more cinematic? Let's hear it.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's the idea?
+      description: What should JARVIS be able to do that it can't today?
+      placeholder: JARVIS should control Spotify playback by voice…
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - New tool / plugin
+        - New HUD panel or visual
+        - New model / provider / voice
+        - Existing feature improvement
+        - Developer experience
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: sketch
+    attributes:
+      label: How might it work?
+      description: A rough sketch — the voice command, the tool name, the UI, anything.
+      placeholder: 'A `spotify_play` tool (CAUTION tier) → "play Daft Punk" → cards in Media Bay.'
+
+  - type: checkboxes
+    id: willing
+    attributes:
+      label: Want to build it?
+      options:
+        - label: I'd be open to opening a PR for this (see CONTRIBUTING.md).

@@ -23,6 +23,7 @@ your own GPU, remembers everything across sessions, and commands your PC through
 ![Image](https://img.shields.io/badge/image-FLUX.2--klein--4B-ff6b6b?style=flat-square)
 ![3D](https://img.shields.io/badge/3D-TRELLIS.2_·_Hunyuan3D-f39c12?style=flat-square)
 ![Voice](https://img.shields.io/badge/voice-Whisper_+_Piper-1abc9c?style=flat-square)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-2ecc71?style=flat-square)
 
 <br/>
 
@@ -433,6 +434,20 @@ config.yaml    All configuration (persona, model, voice, permissions, plugins)
 - [ ] More image models in the command-bar switcher
 - [ ] Voice-cloning for a fully custom TTS profile
 - [ ] Plugin marketplace / hot-reload
+
+---
+
+## 🤝 Contributing
+
+JARVIS thrives on community tools. **Adding a new capability is ~30 lines in a single
+file** — drop a module in `jarvis/plugins/` and the registry auto-discovers it on boot.
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the 5-minute tool tutorial, dev setup, and
+the safety rules.
+
+Good first contributions: a new tool, a HUD panel, another model/voice backend, or docs.
+
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-2ecc71?style=flat-square)](CONTRIBUTING.md)
+[![Good First Issues](https://img.shields.io/github/issues/Dix01/JARVIS/good%20first%20issue?style=flat-square&color=7057ff&label=good%20first%20issues)](https://github.com/Dix01/JARVIS/labels/good%20first%20issue)
 
 ---
 
