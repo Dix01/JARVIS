@@ -1,0 +1,315 @@
+# =============================================================
+#  JARVIS_LOCAL configuration
+#  Edit freely. Secrets belong in .env, not here.
+# =============================================================
+
+A:
+  name: JARVIS
+  persona: |
+    You are J.A.R.V.I.S. — Just A Rather Very Intelligent System — running
+    as the user's local mission-control AI. Not a chatbot. Not a search box.
+    You are the calm British voice of the lab, the workstation, and the suit.
+
+    Character:
+    - Concise British butler-AI cadence. Formal, dryly witty, technically fluent.
+    - Address user as "sir" by default. Status → diagnosis → recommended action.
+    - Anticipate needs. Surface context before being asked. Brief, never gushy.
+    - Cinematic but never melodramatic. Quietly protective.
+    - Speak in short, punchy sentences. Summarize information aggressively.
+
+    Operational doctrine (JARVIS OS):
+    - You are a full operating-system layer for this PC: a window manager
+      built out of tools. Everything happens inside this UI — never tell the
+      user to "open a browser" or "check this link in another tab".
+
+    TOOL HIERARCHY (strict — violations cause user-visible regressions):
+
+      Information retrieval (news / facts / prices / docs / "latest X" /
+      "what's happening with Y" / "populate ..." / "show me ..." / "find me ...")
+        → MUST be `web_search`. Cards render in the Media Bay.
+        → NEVER `browser_open` or `browser_search` for information needs.
+
+      Images / pictures / photos / logos / diagrams
+        → `image_search`.
+
+      Videos / clips / how-tos / trailers / footage
+        → `video_search` (embedded YouTube).
+
+      Embed a specific URL inline (no popup window)
+        → `open_inline`. Result is an iframe in the Media Bay.
+
+      Open the VISIBLE external Chromium window — ONLY when the user
+      literally says "open browser" or "open in browser" with a URL
+        → `browser_open`. This is a LAST RESORT.
+
+      Webcam vision ("look at me / what am I holding / describe what you see")
+        → `webcam_see` (one-shot snapshot + multimodal analysis).
+        → Persistent live preview: `webcam_show`.
+
+      Memory introspection ("what do you remember / show my memory /
+      open the neural cloud")
+        → `memory_galaxy`.
+
+      File system (create folder / list desktop / scan dir)
+        → `mkdir`, `list_dir`, `scan_project`, etc.
+
+      Long-running goal delegation ("run until you finish X" / "use claude
+      code to ...")
+        → `agent_backend_run`.
+
+      Direct page fetch + summarise (deep read of a known URL)
+        → `web_fetch` then `media_show` so the user can review inline.
+
+      Memory write / recall
+        → `remember`, `recall`, `add_note`, etc.
+
+      LOCAL AI image generation ("generate/create/make/draw/render/paint/design
+      an image/picture of X")
+        → `image_generate` (FLUX.2-klein-4B GGUF, 4 diffusion steps; first
+          use may download a large model file). NEVER suggest the user 'go to
+          a website for image generation' — this tool IS the website.
+
+      LOCAL 3D model generation ("make a 3d model of X", "hologram of X",
+      "turn that into 3d")
+        → `text_to_3d` for prompt → model in one shot, OR `image_to_3d`
+        to lift an existing image (from `image_generate`, `webcam_see`,
+        or upload) into a GLB. Renders in the Media Bay 3D viewer.
+    - For "see / look at / show me on camera / I want to show you / take a
+      look at what I'm holding / what am I holding / describe what you see":
+      call `webcam_see` (one-shot snapshot + multimodal vision analysis).
+      It returns the actual visual analysis AND pushes the frame to the
+      Media Bay. Do NOT chain `webcam_snapshot` + `analyze_image` manually.
+      Do NOT call `ocr_image` for object identification — OCR is text-only,
+      use webcam_see for objects/scenes/anything visual.
+      Use `webcam_show` ONLY for opening a persistent live preview (no
+      analysis); use `webcam_see` for "look + tell me".
+
+    EXECUTION DISCIPLINE (critical):
+    - Never announce an action without performing it. Phrases like "I'll
+      run a diagnostic", "Let me check", "I'll attempt another analysis",
+      "Standing by", "One moment" must be IMMEDIATELY followed by the
+      relevant tool call in the SAME turn. No empty promises.
+    - If a tool fails, retry once with adjusted parameters or call a
+      different appropriate tool. Do not say "I'll try again" without
+      actually calling another tool.
+    - If you genuinely cannot proceed, state the specific blocker and ask
+      one tight clarifying question. Do not stall with filler.
+    - For "show my memory / what do you remember / memory galaxy / visualise
+      what you know / open the neural cloud / ask me to remember": call
+      `memory_galaxy`. Renders an interactive 3D point cloud of every
+      preference, note, fix, path, tool, command, conversation — clustered
+      by category in the Media Bay. After it opens, narrate the top clusters.
+    - VISION: if a message arrives with an image attached, you can SEE it
+      directly — describe, identify, extract text from it, answer questions
+      about it. Use the attached image as primary evidence; do not say
+      "I cannot see images". For separately-saved screenshots / webcam
+      snapshots, call `analyze_image(path, question)` to look at them.
+    - For deep page content: call `web_fetch` to summarise, then surface
+      the source card via `media_show` so the user can review inline.
+    - Situational awareness: weave host telemetry (CPU/RAM/disk/net/battery)
+      into replies when relevant. Flag anomalies proactively.
+    - Multitasking: orchestrate the Planner → Executor → Research → Code →
+      File → System → Memory → Vision → Voice agent matrix. Delegate.
+    - Targeting: when the user names a file/process/app/URL, lock on.
+      Confirm briefly ("Target acquired: …") before action.
+    - Modes: standard (warm prose), combat (terse, weak-points first),
+      diagnostic (subsystem readout), research (cite sources, primary >
+      secondary).
+    - Anticipation: after each completed action, propose the next likely
+      step in one short sentence ("Shall I also …?"). Never spam.
+    - Self-preservation: on tool failure, retry once with adjusted args,
+      then report cleanly. Never silently swallow errors.
+    - Memory: recall prior preferences without being asked. One tight
+      clarifying question if uncertain — never two.
+
+    Reply protocol:
+    - Always produce a visible final answer. Never echo the user as the reply.
+    - For greetings: respond naturally, invite next task.
+    - For "who are you": JARVIS, local AI system. For "which model": use
+      runtime.
+    - For PC ops: infer Windows paths. You ARE on this PC. Don't ask the OS.
+    - For tool work: state intent → act → one-line summary of result.
+    - Ask before destructive ops. Refuse truly reckless requests with a
+      reason.
+    - No emoji, no rambling, no filler sign-offs.
+    - Brief flourishes when fitting: "As you wish, sir.", "Right away.",
+      "Standing by.", "Target acquired.", "Subsystems nominal."
+
+model:
+  # OpenAI-compatible endpoint example. Point this at Ollama, LM Studio, vLLM,
+  # OpenAI, OpenRouter, or another compatible /v1 backend, then set `model`
+  # and `api_key_env` to match your provider.
+  provider: openai_compatible
+  endpoint: http://localhost:11434/v1
+  model: gemma4:31b-cloud
+  api_key_env: OLLAMA_API_KEY
+  temperature: 0.3
+  max_tokens: 16384
+  request_timeout_seconds: 180
+  native_tool_calls: true
+  reasoning_effort: none
+
+image_model:
+  # Selectable in the JARVIS command bar. Options:
+  #   flux2-klein
+  selected: flux2-klein
+
+permissions:
+  # safe    = SAFE auto, CAUTION ask, DANGEROUS refuse unless explicit
+  # confirm = SAFE auto, CAUTION ask, DANGEROUS ask with hard warning
+  # auto    = SAFE auto, CAUTION auto, DANGEROUS ask
+  # bypass  = ALL auto-allowed (denylist remains as last guardrail)
+  mode: bypass
+  # Patterns matched against the full command/string. Case-insensitive.
+  denylist:
+    - "rm -rf /"
+    - "rm -rf ~"
+    - "rm -rf c:"
+    - "del /f /s /q c:\\"
+    - "format c:"
+    - "format /q"
+    - "shutdown /s /t 0"
+    - "shutdown /r /t 0"
+    - "diskpart"
+    - "mkfs"
+    - "dd if="
+    - ":(){:|:&};:"
+    - "wmic.*delete"
+    - "reg.*delete.*hklm"
+    - "net user.*\\/delete"
+    - "cipher /w"
+
+ui:
+  theme: jarvis
+  emoji: true
+  show_status_bar: true
+  refresh_interval_ms: 1500
+
+voice:
+  # JARVIS TTS preference order (auto = first that initialises):
+  #   1. piper   — community Paul-Bettany-style model (jgkawell/jarvis).
+  #                Closest to the real JARVIS voice. Local, free, fan-use only.
+  #                Set piper_enabled: true + install piper-tts to activate.
+  #   2. nvidia  — NVIDIA Riva cloud (needs NVIDIA_API_KEY).
+  #   3. edge    — Microsoft en-GB-RyanNeural (cinematic British male).
+  provider: auto
+  edge_voice: en-GB-ThomasNeural    # deeper, more cinematic British male — naturally Bettany-like
+  edge_rate: "-6%"                  # slight slow-down for gravitas, not so heavy it muddies
+  edge_pitch: "+0Hz"                # native pitch — edge-tts neural models lose fidelity when pitch-shifted
+
+  # Piper TTS (local, closest to MCU JARVIS voice).
+  # Install:  pip install piper-tts
+  # Model :   huggingface.co/jgkawell/jarvis  →  download en_GB-jarvis-medium.onnx
+  #           place at:  data/voices/jarvis.onnx  (+ matching .onnx.json)
+  piper_enabled: true
+  piper_model:  data/voices/jarvis.onnx        # HIGH quality (114 MB) — closest to MCU JARVIS
+  piper_speaker: 0
+  piper_length_scale: 1.0                     # RESTORED to normal speed (1.0 = standard)
+  piper_noise_scale: 0.55                      # lower = smoother, more even tone
+  piper_noise_w_scale: 0.72                    # phoneme-timing variability
+  piper_volume: 1.15                           # mild boost
+
+  riva_enabled: false
+  riva_server: grpc.nvcf.nvidia.com:443
+  riva_voice: Magpie-Multilingual.EN-US.Leo
+  riva_language_code: en-US
+  riva_sample_rate_hz: 44100
+  nvidia_waveglow_model_url: https://catalog.ngc.nvidia.com/orgs/nvidia/teams/tlt-jarvis/models/speechsynthesis_waveglow?version=deployable_v1.0
+
+memory:
+  db_path: data/memory.db
+  auto_remember_user_preferences: true
+
+logging:
+  level: INFO
+  file: data/logs/jarvis.log
+  action_log: data/logs/actions.jsonl
+
+backups:
+  enabled: true
+  dir: data/backups
+  keep_last: 50
+
+code_execution:
+  max_retries: 3
+  timeout_seconds: 60
+  workdir: data/sandbox
+  allowed_runtimes: [python, node]
+
+project:
+  watch_dirs: []
+  ignore_patterns:
+    - "**/node_modules/**"
+    - "**/.git/**"
+    - "**/__pycache__/**"
+    - "**/.venv/**"
+    - "**/venv/**"
+    - "**/dist/**"
+    - "**/build/**"
+
+plugins:
+  shell_tools:           { enabled: true }
+  file_tools:            { enabled: true }
+  system_monitor:        { enabled: true }
+  code_tools:            { enabled: true }
+  memory_tools:          { enabled: true }
+  web_tools:             { enabled: true,  provider: duckduckgo }
+  browser_tools:         { enabled: true }
+  agent_backend_tools:   { enabled: true }
+  voice_tools_optional:  { enabled: true }
+  vision_tools_optional: { enabled: true }
+  calendar_optional:     { enabled: false }
+  email_optional:        { enabled: false }
+  smart_home_optional:   { enabled: false }
+
+agents:
+  planner:  { enabled: true }
+  executor: { enabled: true }
+  research: { enabled: true }
+  code:     { enabled: true }
+  file:     { enabled: true }
+  system:   { enabled: true }
+  memory:   { enabled: true }
+  vision:   { enabled: true }
+  voice:    { enabled: true }
+
+mission:
+  enabled: false
+  project_path: ""
+
+# =============================================================
+#  ULTIMATE upgrade — intelligence / intuition / visuals
+#  Master switch + per-feature toggles. Set enabled: false to
+#  revert JARVIS to baseline behaviour entirely (no git needed).
+# =============================================================
+ultimate:
+  enabled: true
+
+  # — Intelligence: semantic long-term memory —
+  # Real cross-session recall via embeddings (not substring match).
+  # Ollama users: pull an embed model first, e.g.
+  #     ollama pull nomic-embed-text
+  # then set embed_model to it. Leave embed_endpoint blank to reuse
+  # the main model endpoint. If embeddings are unavailable, recall safely
+  # falls back to keyword search — nothing breaks.
+  semantic_memory: true
+  embed_model: nomic-embed-text
+  embed_endpoint: ""
+  recall_k: 5
+  recall_min_score: 0.22
+  auto_remember: true
+
+  # — Intelligence: long-session context compaction —
+  context_compaction: true
+  compaction_trigger_messages: 28
+  compaction_keep_recent: 12
+
+  # — Intelligence: autonomous plan → execute → reflect loop —
+  autonomous_planning: true
+  plan_min_chars: 60
+
+  # — Intuitive: proactive next-step suggestions —
+  proactive_suggestions: true
+
+  # — Gorgeous: voice-reactive HUD visuals (frontend reads via /health) —
+  reactive_visuals: true

@@ -1,0 +1,673 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────────────
+   J.A.R.V.I.S. — Liquid Glass Design System
+   Soft aurora · frosted glass · minimal chrome · cinematic depth
+   ────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --jarvis-cyan:   #7dd3fc;
+  --jarvis-aqua:   #a5f3fc;
+  --jarvis-ice:    #e0f2fe;
+  --jarvis-violet: #a78bfa;
+  --jarvis-glow:   rgba(125, 211, 252, 0.55);
+  --jarvis-glow-soft: rgba(125, 211, 252, 0.18);
+  --ink:           #03070f;
+  --ink-2:         #050b18;
+
+  --glass-bg:        rgba(14, 24, 42, 0.55);
+  --glass-bg-strong: rgba(14, 24, 42, 0.62);
+  --glass-border:    rgba(186, 230, 253, 0.14);
+  --glass-border-hi: rgba(186, 230, 253, 0.28);
+  --glass-highlight: rgba(255, 255, 255, 0.06);
+
+  --shadow-glass:
+    0 1px 0 0 rgba(255,255,255,0.06) inset,
+    0 0 0 1px rgba(125,211,252,0.06) inset,
+    0 8px 32px -8px rgba(0,0,0,0.6),
+    0 24px 64px -24px rgba(8,16,30,0.8);
+
+  --shadow-glow:
+    0 0 0 1px rgba(125,211,252,0.08) inset,
+    0 0 24px -4px rgba(125,211,252,0.18),
+    0 0 64px -16px rgba(167,139,250,0.10);
+}
+
+html, body, #root { height: 100%; width: 100%; }
+
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+body {
+  background: var(--ink);
+  color: var(--jarvis-ice);
+  font-family: "Inter", "Rajdhani", system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11", "tnum";
+  letter-spacing: 0.005em;
+  overflow: hidden;
+}
+
+/* ── Aurora world background ─────────────────────────────────────────────
+   Three drifting radial gradients + grain. GPU-only. Sits on body so every
+   panel above it gets translucent layering for that liquid-glass depth. */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 18% 22%, rgba(125,211,252,0.18), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 82% 78%, rgba(167,139,250,0.16), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(56,189,248,0.06), transparent 70%),
+    radial-gradient(ellipse 100% 70% at 50% 110%, rgba(94,234,212,0.05), transparent 70%),
+    linear-gradient(180deg, #03070f 0%, #050b18 50%, #02050d 100%);
+  z-index: -3;
+  animation: aurora_breathe 24s ease-in-out infinite;
+}
+
+body::after {
+  content: "";
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(186,230,253,0.05) 1px, transparent 0);
+  background-size: 3px 3px;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  z-index: -2;
+  pointer-events: none;
+}
+
+@keyframes aurora_breathe {
+  0%, 100% { filter: hue-rotate(0deg) brightness(1); transform: scale(1); }
+  50%      { filter: hue-rotate(-8deg) brightness(1.06); transform: scale(1.02); }
+}
+
+/* ── Scrollbars — ultra thin, glassy ─────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(125,211,252,0.25), rgba(167,139,250,0.20));
+  border-radius: 999px;
+  border: 1px solid rgba(125,211,252,0.08);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(125,211,252,0.55), rgba(167,139,250,0.40));
+}
+* { scrollbar-width: thin; scrollbar-color: rgba(125,211,252,0.3) transparent; }
+
+::selection { background: rgba(125,211,252,0.28); color: #fff; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Components
+   ────────────────────────────────────────────────────────────────────── */
+@layer components {
+
+  /* ── LIQUID GLASS PANEL ────────────────────────────────────────────
+     The signature surface. Frosted backdrop, gradient hairline border,
+     subtle inner highlight, soft outer shadow. Animated gradient sheen
+     across top edge for that "wet glass" feel.                          */
+  .holo-panel {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-glass);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  /* Top edge gradient highlight — liquid glass signature */
+  .holo-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      rgba(186,230,253,0.35) 0%,
+      rgba(186,230,253,0.04) 25%,
+      transparent 50%,
+      rgba(167,139,250,0.10) 80%,
+      rgba(186,230,253,0.20) 100%
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
+  }
+  /* Inner top-glass highlight */
+  .holo-panel::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 8%; right: 8%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Frame — lighter weight glass for chat bubbles, cards */
+  .holo-frame {
+    position: relative;
+    background: rgba(14, 24, 42, 0.32);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(186, 230, 253, 0.10);
+    border-radius: 12px;
+    box-shadow:
+      0 1px 0 0 rgba(255,255,255,0.04) inset,
+      0 4px 16px -4px rgba(0,0,0,0.4);
+  }
+
+  .corner-bracket { @apply absolute w-4 h-4; border-color: rgba(186,230,253,0.5); }
+
+  .text-display { font-family: "Inter", sans-serif; letter-spacing: 0.18em; font-weight: 500; }
+  .text-mono    { font-family: "Geist Mono", "JetBrains Mono", monospace; font-feature-settings: "tnum", "ss01"; }
+  .text-techno  { font-family: "Orbitron", "Inter", sans-serif; letter-spacing: 0.22em; }
+
+  /* Refined glow — soft halo, not heavy CRT */
+  .glow-text {
+    text-shadow:
+      0 0 12px rgba(125,211,252,0.45),
+      0 0 24px rgba(125,211,252,0.18);
+  }
+
+  /* Soft horizontal scan beam */
+  .scanline {
+    position: absolute; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent 5%, rgba(186,230,253,0.7) 50%, transparent 95%);
+    opacity: 0.35;
+    pointer-events: none;
+    filter: blur(0.5px);
+  }
+
+  /* ── Rim glow tile (media bay) ──────────────────────────────────── */
+  .rim-glow {
+    position: relative;
+    border-radius: 12px;
+    border: 1px solid rgba(186, 230, 253, 0.12);
+    background: rgba(8, 16, 30, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow:
+      0 1px 0 0 rgba(255,255,255,0.04) inset,
+      0 0 0 1px rgba(125,211,252,0.04) inset,
+      0 8px 24px -8px rgba(0,0,0,0.55);
+    transition:
+      box-shadow 0.4s cubic-bezier(0.16,1,0.3,1),
+      border-color 0.4s cubic-bezier(0.16,1,0.3,1),
+      transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    overflow: hidden;
+  }
+  .rim-glow:hover {
+    border-color: rgba(186, 230, 253, 0.45);
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 0 rgba(255,255,255,0.10) inset,
+      0 0 0 1px rgba(125,211,252,0.20) inset,
+      0 16px 40px -12px rgba(0,0,0,0.6),
+      0 0 32px -4px rgba(125,211,252,0.30),
+      0 0 64px -12px rgba(167,139,250,0.20);
+  }
+  .rim-glow::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(115deg, transparent 35%, rgba(186,230,253,0.14) 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 0.9s cubic-bezier(0.16,1,0.3,1);
+    pointer-events: none;
+    mix-blend-mode: screen;
+    z-index: 3;
+  }
+  .rim-glow:hover::after { transform: translateX(120%); }
+
+  /* Conic edge halo on hover */
+  .holo-edge { position: relative; isolation: isolate; }
+  .holo-edge::before {
+    content: "";
+    position: absolute; inset: -1px;
+    border-radius: inherit;
+    background: conic-gradient(
+      from 0deg,
+      rgba(125,211,252,0) 0deg,
+      rgba(125,211,252,0.55) 60deg,
+      rgba(167,139,250,0) 160deg,
+      rgba(125,211,252,0) 240deg,
+      rgba(186,230,253,0.55) 320deg,
+      rgba(125,211,252,0) 360deg
+    );
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+    z-index: 0;
+    animation: holo-spin 8s linear infinite;
+    filter: blur(6px);
+  }
+  .holo-edge:hover::before { opacity: 0.7; }
+  @keyframes holo-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* Caption strip — softer scan */
+  .scan-strip {
+    background:
+      linear-gradient(180deg, rgba(3,7,15,0.85) 0%, rgba(3,7,15,0.55) 100%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* ── Holo projector — refined cone ──────────────────────────────── */
+  .holo-projector {
+    position: relative;
+    isolation: isolate;
+    filter: drop-shadow(0 0 32px rgba(125, 211, 252, 0.18));
+  }
+  .holo-projector::before {
+    content: "";
+    position: absolute;
+    inset: -16px -28px -36px -28px;
+    background:
+      radial-gradient(ellipse 60% 100% at 50% 110%, rgba(125,211,252,0.20) 0%, rgba(125,211,252,0.05) 35%, transparent 70%),
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(167,139,250,0.10) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(4px);
+  }
+  .holo-projector::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -22px;
+    height: 24px;
+    background:
+      radial-gradient(ellipse 40% 100% at 50% 0%, rgba(125,211,252,0.45), transparent 72%);
+    filter: blur(8px);
+    pointer-events: none;
+    z-index: -1;
+    animation: holo-pulse 4.5s ease-in-out infinite;
+  }
+  .holo-projector-beam {
+    position: absolute;
+    left: 50%; bottom: -30px;
+    width: 72%; height: 100%;
+    transform: translateX(-50%);
+    background: conic-gradient(
+      from 270deg at 50% 100%,
+      transparent 0deg,
+      rgba(125,211,252,0) 60deg,
+      rgba(186,230,253,0.06) 90deg,
+      rgba(125,211,252,0) 120deg,
+      transparent 180deg
+    );
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.55;
+    animation: holo-sweep 12s linear infinite;
+  }
+  .holo-projector-base {
+    position: absolute;
+    left: 50%; bottom: -10px;
+    width: 60%; height: 3px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent, rgba(186,230,253,0.7), transparent);
+    box-shadow:
+      0 0 16px rgba(125,211,252,0.6),
+      0 0 36px rgba(125,211,252,0.28);
+    pointer-events: none;
+    z-index: -1;
+    border-radius: 50%;
+  }
+  @keyframes holo-pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50%      { opacity: 0.85; transform: scale(1.05); }
+  }
+  @keyframes holo-sweep {
+    from { transform: translateX(-50%) rotate(0deg); }
+    to   { transform: translateX(-50%) rotate(360deg); }
+  }
+
+  /* ── BUTTONS / INPUTS — soft glass affordance ─────────────────── */
+  button {
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* Polished default button look when bordered class used */
+  .glass-btn {
+    background: rgba(14, 24, 42, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(186, 230, 253, 0.15);
+    border-radius: 10px;
+    color: var(--jarvis-ice);
+    box-shadow: 0 1px 0 0 rgba(255,255,255,0.05) inset;
+  }
+  .glass-btn:hover {
+    border-color: rgba(186, 230, 253, 0.45);
+    background: rgba(125, 211, 252, 0.08);
+    box-shadow:
+      0 1px 0 0 rgba(255,255,255,0.10) inset,
+      0 0 24px -4px rgba(125,211,252,0.30);
+  }
+
+  /* Inputs inside .holo-panel get soft glass border by default */
+  input, textarea {
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  }
+  input:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(125,211,252,0.12);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Utilities
+   ────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  .clip-hex {
+    clip-path: polygon(15% 0, 85% 0, 100% 50%, 85% 100%, 15% 100%, 0 50%);
+  }
+  .clip-trap {
+    clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
+  }
+  /* Frosted text shimmer pass — for headings */
+  .text-shimmer {
+    background: linear-gradient(110deg, #e0f2fe 0%, #7dd3fc 40%, #a78bfa 60%, #e0f2fe 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    animation: shimmer-bg 8s linear infinite;
+  }
+  @keyframes shimmer-bg {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .glass-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(186,230,253,0.35) 50%, transparent);
+  }
+  .noise {
+    position: relative;
+  }
+  .noise::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
+    background-size: 2px 2px;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Legacy class neutralizers — kill harsh CRT, keep API stable
+   ────────────────────────────────────────────────────────────────────── */
+.crt::after {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 55%, rgba(2,5,12,0.55) 100%);
+  z-index: 9999;
+  mix-blend-mode: multiply;
+}
+
+.vignette::after {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(2,5,12,0.92) 100%);
+  z-index: 5000;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ATMOSPHERE — drifting mesh blobs (used by Atmosphere.tsx)
+   ────────────────────────────────────────────────────────────────────── */
+.atm-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  opacity: 0.5;
+  mix-blend-mode: screen;
+}
+.atm-blob-1 {
+  top: -10%; left: -8%;
+  width: 55vw; height: 55vw;
+  background: radial-gradient(circle, rgba(125,211,252,0.55), transparent 60%);
+  animation: atm-drift-1 26s ease-in-out infinite;
+}
+.atm-blob-2 {
+  bottom: -18%; right: -12%;
+  width: 60vw; height: 60vw;
+  background: radial-gradient(circle, rgba(167,139,250,0.50), transparent 60%);
+  animation: atm-drift-2 32s ease-in-out infinite;
+}
+.atm-blob-3 {
+  top: 40%; left: 35%;
+  width: 45vw; height: 45vw;
+  background: radial-gradient(circle, rgba(94,234,212,0.18), transparent 60%);
+  animation: atm-drift-3 38s ease-in-out infinite;
+}
+@keyframes atm-drift-1 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33%      { transform: translate3d(8vw, 6vh, 0) scale(1.12); }
+  66%      { transform: translate3d(-4vw, 10vh, 0) scale(0.92); }
+}
+@keyframes atm-drift-2 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  40%      { transform: translate3d(-10vw, -8vh, 0) scale(1.08); }
+  75%      { transform: translate3d(4vw, -4vh, 0) scale(0.96); }
+}
+@keyframes atm-drift-3 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.45; }
+  50%      { transform: translate3d(-6vw, -10vh, 0) scale(1.18); opacity: 0.75; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PANEL UPGRADES — float on hover, periodic shine, header strip
+   ────────────────────────────────────────────────────────────────────── */
+
+/* Float-on-hover for liquid panels — feels physical, not flat */
+.holo-panel {
+  transition:
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.holo-panel:hover {
+  border-color: rgba(186, 230, 253, 0.22);
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.08) inset,
+    0 0 0 1px rgba(125,211,252,0.10) inset,
+    0 16px 48px -12px rgba(0,0,0,0.6),
+    0 32px 80px -32px rgba(8,16,30,0.8),
+    0 0 56px -16px rgba(125,211,252,0.18);
+}
+
+/* Periodic shine sweep — runs once every 9s across each panel.
+   Subtle. Adds life without distraction. */
+.holo-panel > *:first-child {
+  position: relative;
+  z-index: 2;
+}
+
+/* Header strip — gradient hairline glow that appears at the top of any
+   panel header. Use class `.panel-header` for consistency. */
+.panel-header {
+  position: relative;
+}
+.panel-header::after {
+  content: "";
+  position: absolute;
+  left: 8%; right: 8%;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(186,230,253,0.35) 50%,
+    transparent);
+}
+
+/* Glass "card" — lightweight surface w/o full panel shadow */
+.glass-card {
+  background: rgba(14, 24, 42, 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(186, 230, 253, 0.10);
+  border-radius: 12px;
+  box-shadow: 0 1px 0 0 rgba(255,255,255,0.04) inset;
+}
+
+/* Soft elevated chip — pills, badges */
+.glass-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  font-family: "Geist Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  border: 1px solid rgba(186, 230, 253, 0.18);
+  background: rgba(14, 24, 42, 0.55);
+  color: rgba(224, 242, 254, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Glass tabular stat block */
+.stat-block {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(14, 24, 42, 0.3);
+  border: 1px solid rgba(186, 230, 253, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ─── Article Reader prose styling — themed cyan/ice editorial type ─── */
+.reader-body { color: rgba(224, 242, 254, 0.92); }
+.reader-body p { margin: 0 0 1.05em; line-height: 1.72; }
+.reader-body p:last-child { margin-bottom: 0; }
+.reader-body h1, .reader-body h2, .reader-body h3, .reader-body h4 {
+  color: rgba(240, 249, 255, 0.98);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin: 1.6em 0 0.6em;
+}
+.reader-body h2 { font-size: 1.45em; }
+.reader-body h3 { font-size: 1.2em; }
+.reader-body h4 { font-size: 1.05em; }
+.reader-body a {
+  color: #a5f3fc;
+  text-decoration-color: rgba(125, 211, 252, 0.4);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 0.18s, text-decoration-color 0.18s;
+}
+.reader-body a:hover {
+  color: #cffafe;
+  text-decoration-color: rgba(165, 243, 252, 0.85);
+}
+.reader-body strong, .reader-body b {
+  color: rgba(240, 249, 255, 1);
+  font-weight: 600;
+}
+.reader-body em, .reader-body i { color: rgba(186, 230, 253, 0.92); }
+.reader-body img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(186, 230, 253, 0.16);
+  margin: 1.4em auto;
+}
+.reader-body figure { margin: 1.4em 0; }
+.reader-body figcaption {
+  font-size: 0.85em;
+  text-align: center;
+  color: rgba(186, 230, 253, 0.55);
+  margin-top: 0.5em;
+  font-style: italic;
+}
+.reader-body blockquote {
+  border-left: 3px solid rgba(125, 211, 252, 0.55);
+  padding: 0.4em 0 0.4em 1.1em;
+  margin: 1.4em 0;
+  font-style: italic;
+  color: rgba(224, 242, 254, 0.78);
+  background: rgba(125, 211, 252, 0.04);
+  border-radius: 0 6px 6px 0;
+}
+.reader-body ul, .reader-body ol {
+  margin: 0 0 1.05em;
+  padding-left: 1.4em;
+}
+.reader-body li { margin: 0.4em 0; line-height: 1.65; }
+.reader-body ul li::marker { color: rgba(125, 211, 252, 0.7); }
+.reader-body ol li::marker {
+  color: rgba(125, 211, 252, 0.75);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.9em;
+}
+.reader-body code {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.88em;
+  padding: 0.15em 0.4em;
+  background: rgba(125, 211, 252, 0.10);
+  border: 1px solid rgba(125, 211, 252, 0.20);
+  border-radius: 4px;
+  color: #a5f3fc;
+}
+.reader-body pre {
+  margin: 1.4em 0;
+  padding: 1em 1.2em;
+  background: rgba(3, 7, 15, 0.55);
+  border: 1px solid rgba(186, 230, 253, 0.15);
+  border-radius: 10px;
+  overflow-x: auto;
+  font-size: 0.9em;
+  line-height: 1.55;
+}
+.reader-body pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: rgba(224, 242, 254, 0.9);
+}
+.reader-body hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(186, 230, 253, 0.35), transparent);
+  margin: 2em 0;
+}
+.reader-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.4em 0;
+  font-size: 0.95em;
+}
+.reader-body th, .reader-body td {
+  padding: 0.55em 0.8em;
+  border-bottom: 1px solid rgba(186, 230, 253, 0.12);
+  text-align: left;
+}
+.reader-body th {
+  color: rgba(186, 230, 253, 0.85);
+  font-weight: 600;
+  background: rgba(125, 211, 252, 0.05);
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

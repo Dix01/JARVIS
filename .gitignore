@@ -1,0 +1,44 @@
+venv/
+node_modules/
+web/node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.claude/settings.local.json
+data/memory.db
+data/memory.db-*
+data/logs/
+data/backups/
+data/project_backups/
+data/sandbox/
+data/generated/
+data/screenshots/
+data/browser_screenshots/
+data/uploads/
+data/refs/
+data/models/*
+!data/models/README.md
+data/voices/*
+!data/voices/README.md
+.idea/
+.vscode/
+*.egg-info/
+dist/
+build/
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+dist-electron/
+dist-installer/
+
+# Abandoned / vendored external repos (own .git, large, unused by app)
+TripoSR/
+stable-fast-3d/
+output/
+
+# Runtime logs
+*.log
+
+# Research scratch (embedded repos, wheels, ~360MB, not used at runtime)
+data/research/

@@ -1,0 +1,55 @@
+# Core
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+websockets>=12.0
+httpx>=0.25.0
+trafilatura>=2.0.0                # in-app news reader content extraction
+pydantic>=2.5.0
+pyyaml>=6.0.1
+psutil>=5.9.0
+python-dotenv>=1.0.0
+rich>=13.7.0
+
+# Voice
+edge-tts>=6.1.12                  # online Microsoft neural TTS fallback (en-GB Ryan / Thomas)
+piper-tts>=1.4.2                  # local JARVIS voice (jgkawell/jarvis ONNX)
+faster-whisper>=1.0.0             # server-side STT
+nvidia-riva-client>=2.25.0        # optional NVIDIA Riva cloud TTS
+SpeechRecognition>=3.10.0         # optional voice_tools listen/microphone_status
+pyttsx3>=2.90                     # optional voice_tools local speak fallback
+
+# Vision
+opencv-python>=4.9.0              # webcam capture + frame ops
+mss>=9.0.1                        # screenshot capture
+pytesseract>=0.3.10               # OCR (needs tesseract.exe; winget install UB-Mannheim.TesseractOCR)
+Pillow>=10.0.0                    # image IO
+
+# Browser automation (after pip install run:  playwright install chromium)
+playwright>=1.40.0
+
+# GPU stats
+nvidia-ml-py>=12.0.0              # preferred; falls back to nvidia-smi if missing
+
+# Local AI image generation (FLUX.2-klein-4B GGUF). First use can download ~8 GB.
+torch>=2.4.0
+diffusers>=0.38.0
+transformers>=4.44.0
+accelerate>=0.34.0
+sentencepiece>=0.2.0
+safetensors>=0.4.4
+huggingface-hub>=0.24.0
+gguf>=0.10.0
+
+# Local 3D generation (Hunyuan3D-2GP Mini Turbo). The source snapshot and
+# model subfolders auto-download to data/models on first use.
+einops>=0.8.0
+omegaconf>=2.3.0
+pymeshlab>=2025.7
+mmgp==3.2.7
+rembg>=2.0.67
+onnxruntime>=1.18.0
+# Optional speed path for DMC mesh extraction if a compatible wheel/build exists:
+#   pip install diso
+
+# OPTIONAL - GPU acceleration for Whisper STT (cuFFT/cuBLAS/cuDNN DLLs):
+#   pip install nvidia-cublas-cu12 nvidia-cudnn-cu12 nvidia-cufft-cu12

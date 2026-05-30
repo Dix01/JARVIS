@@ -1,0 +1,36 @@
+{
+  "name": "jarvis-app",
+  "version": "0.2.0",
+  "description": "JARVIS standalone desktop shell",
+  "main": "main.cjs",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.jarvis.local",
+    "productName": "JARVIS",
+    "directories": {
+      "output": "../dist-electron"
+    },
+    "files": [
+      "main.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../web/dist",
+        "to": "web"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "../web/public/favicon.svg"
+    }
+  }
+}
