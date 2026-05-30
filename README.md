@@ -1,146 +1,421 @@
+<div align="center">
+
 # J.A.R.V.I.S.
 
-Local-first AI command center for Windows.
+### *Just A Rather Very Intelligent System* — your own local-first AI mission control.
 
-J.A.R.V.I.S. pairs a React/Three.js HUD with a FastAPI backend, local memory,
-tool plugins, browser control, voice, vision, media generation, and agent CLI
-delegation.
+A voice-driven assistant wrapped in an Iron-Man holographic HUD. It talks back in a
+British butler voice, sees through your webcam, generates images **and** 3D models on
+your own GPU, remembers everything across sessions, and commands your PC through
+**80+ tools** — all running on your machine. No cloud required.
+
+<br/>
+
+![Platform](https://img.shields.io/badge/platform-Windows-0a84ff?style=for-the-badge&logo=windows)
+![Python](https://img.shields.io/badge/Python-3.10+-3776ab?style=for-the-badge&logo=python&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61dafb?style=for-the-badge&logo=react&logoColor=black)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Three.js](https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white)
+![Electron](https://img.shields.io/badge/Electron-2b2e3a?style=for-the-badge&logo=electron&logoColor=9feaf9)
+
+![Local First](https://img.shields.io/badge/local--first-no_cloud_required-2ecc71?style=flat-square)
+![LLM Agnostic](https://img.shields.io/badge/LLM-Ollama_·_LM_Studio_·_vLLM_·_OpenAI_·_Anthropic-8e44ad?style=flat-square)
+![Image](https://img.shields.io/badge/image-FLUX.2--klein--4B-ff6b6b?style=flat-square)
+![3D](https://img.shields.io/badge/3D-TRELLIS.2_·_Hunyuan3D-f39c12?style=flat-square)
+![Voice](https://img.shields.io/badge/voice-Whisper_+_Piper-1abc9c?style=flat-square)
+
+<br/>
 
 ![J.A.R.V.I.S. HUD](docs/images/dashboard.png)
 
-## What It Can Do
+</div>
 
-- Chat through an OpenAI-compatible model endpoint, or through Anthropic's
-  Messages API when `provider: anthropic` is configured.
-- Search the web, news, images, and videos; fetch readable page text; show
-  results as cards inside the Media Bay.
-- Control a visible Chromium browser through Playwright: open pages, read text,
-  click, type, press keys, and take screenshots.
-- Work on the local machine: files, folders, shell commands, Python snippets,
-  Node snippets, package installs, project scans, and debug loops.
-- Monitor the PC: CPU, RAM, GPU, disk, network, battery, and process details.
-- Use voice: browser microphone input and speech output, server-side
-  faster-whisper STT, Piper local TTS, NVIDIA Riva TTS, and Edge TTS fallback.
-- Use vision: screenshots, webcam snapshots, live webcam preview, OCR, and
-  image analysis through the configured multimodal model.
-- Remember things locally: SQLite conversation memory, notes, preferences,
-  paths, known fixes, tool history, command history, and a memory galaxy view.
-- Generate media locally with FLUX.2-klein-4B GGUF; generated images stay in
-  ignored local runtime folders.
-- Build 3D assets when optional 3D dependencies are installed: text-to-3D goes
-  through FLUX image generation, then image-to-3D via Stable Fast 3D or TripoSR.
-- Delegate long-running goals to installed Claude Code, Codex, or OpenCode CLI
-  backends.
-- Use optional plugins for a local JSON calendar, SMTP email, and Home
-  Assistant smart-home control.
-- Enforce tool permissions with SAFE, CAUTION, and DANGEROUS tiers, plus local
-  action logs and edit backups.
+---
 
-## Quick Start
+## ⚡ What is this?
 
-Clone with submodules:
+J.A.R.V.I.S. is a **desktop AI command center** for Windows. Point it at any
+OpenAI-compatible model (local or cloud), and you get a cinematic, full-screen
+holographic interface that you talk to like Tony Stark talks to his lab.
 
-```bat
-git clone --recurse-submodules https://github.com/Dix01/J.A.R.V.I.S.git
-cd J.A.R.V.I.S
+It is **not** a chat box. It is a window manager built out of tools — every action
+happens *inside* the UI. Ask it to generate an image and the picture materializes in
+the Media Bay. Ask it to look at you and the webcam opens. Ask what it remembers and a
+3D galaxy of your data unfolds. Say "Hey JARVIS" and it wakes; say "cancel" and it
+stops talking.
+
+```
+You:    "Hey JARVIS, generate a chrome helmet on a black background, then make it 3D."
+JARVIS: "Right away, sir."  →  FLUX renders the image  →  TRELLIS lifts it into a
+        rotatable GLB hologram in the Media Bay. ~Seconds, fully local, on your GPU.
 ```
 
-Install and run:
+---
+
+## ✨ Highlights
+
+|  |  |
+|---|---|
+| 🎙️ **Full voice loop** | Wake-word ("Hey JARVIS"), server-side Whisper STT, British-butler TTS, barge-in cancel, time-aware greetings. |
+| 🧠 **Real memory** | Semantic cross-session recall via embeddings, notes, fixes, paths, prefs — visualized as a 3D **Neural Galaxy**. |
+| 🖼️ **Local image gen** | **FLUX.2-klein-4B** (Q6_K GGUF, 4 steps) renders in seconds on a 16 GB GPU — no API, no watermark. |
+| 🧊 **Local image→3D** | **TRELLIS.2-4B FP8** / **Hunyuan3D-2 mini** turn any image into a textured GLB, rendered inline. |
+| 👁️ **Vision** | One-shot webcam analysis, live preview, screen capture, OCR, drag-and-drop image Q&A. |
+| 🌐 **Web + browser** | Web/image/video search as cards, readable page fetch, and a *visible* Playwright-driven Chromium. |
+| 🛠️ **Owns your PC** | Files, shell, PowerShell, Python/Node sandboxes, package installs, live CPU/GPU/RAM/disk/net telemetry. |
+| 🤖 **Agent swarm** | A 9-role agent matrix with an autonomous plan→execute→reflect loop, plus delegation to Claude Code / Codex / OpenCode. |
+| 🪟 **The HUD** | Arc-reactor core, voice-reactive orb, parallax depth, boot sequence, live terminal — React + Three.js. |
+| 🔒 **Safe by design** | SAFE / CAUTION / DANGEROUS tool tiers, a hard denylist, action logs, and automatic edit backups. |
+
+---
+
+## 📸 Gallery
+
+<div align="center">
+
+<table>
+<tr>
+<td width="50%">
+
+![Boot sequence](docs/images/boot.png)
+
+<sub>**Cold boot** — kernel init, natural-language core, British voice profile, secure local uplink.</sub>
+
+</td>
+<td width="50%">
+
+![Holographic cockpit](docs/images/hud-wide.png)
+
+<sub>**Full cockpit** — arc-reactor core, live subsystem telemetry, terminal + mission log, dialogue.</sub>
+
+</td>
+</tr>
+</table>
+
+</div>
+
+---
+
+## 🚀 Quick Start
+
+> **Requirements:** Windows 10/11 · Python 3.10+ · Node 18+ · an NVIDIA GPU (recommended,
+> for image/3D/Whisper) · and an LLM endpoint (e.g. [Ollama](https://ollama.com) or
+> [LM Studio](https://lmstudio.ai) running locally — or an API key).
 
 ```bat
+:: 1. Clone
+git clone https://github.com/Dix01/JARVIS.git
+cd JARVIS
+
+:: 2. Install backend venv + frontend deps + Electron
 setup.bat
+
+:: 3. Configure
 copy .env.example .env
-notepad .env
-notepad config.yaml
+notepad .env          :: put your API key(s) here (optional for local models)
+notepad config.yaml   :: point `model.endpoint` at your LLM
+
+:: 4. Launch
 run.bat
 ```
 
-Open:
+Then open the desktop app (Electron) — or visit:
 
-```text
+```
 http://127.0.0.1:7341
 ```
 
-For hot reload during development:
+Developing? `run-dev.bat` gives you hot-reload on the frontend.
 
-```bat
-run-dev.bat
-```
+> 💡 **No GPU?** It still runs. Image/3D/Whisper degrade gracefully and heavy models
+> load lazily only when first used. Chat, web, memory, vision-via-API, and the full HUD
+> work on any machine.
 
-## Model Assets
+---
 
-Large model files are not committed to this repository.
+## 🧩 Configure the model
 
-Download instructions live here:
-
-- [Model asset guide](docs/MODEL_ASSETS.md)
-- FLUX GGUF cache: `data/models/`
-- Piper voice cache: `data/voices/`
-
-The app can run without those files. It falls back where possible and downloads
-some optional assets lazily on first use.
-
-## Configure The Model
-
-Edit `config.yaml`, then set the matching key in `.env`.
-
-Example local setup:
+J.A.R.V.I.S. speaks to **any OpenAI-compatible `/v1` endpoint** *or* the Anthropic
+Messages API. Edit `config.yaml`:
 
 ```yaml
 model:
-  provider: openai_compatible
-  endpoint: http://localhost:11434/v1
+  provider: openai_compatible          # or: anthropic
+  endpoint: http://localhost:11434/v1  # Ollama, LM Studio, vLLM, OpenRouter, OpenAI…
   model: your-model-name
-  api_key_env: OLLAMA_API_KEY
+  api_key_env: OLLAMA_API_KEY          # the .env variable to read the key from
+  native_tool_calls: true
+  temperature: 0.3
 ```
 
-For local OpenAI-compatible servers, point `endpoint` at LM Studio, Ollama,
-vLLM, OpenAI, OpenRouter, or another compatible `/v1` backend. The `api_key_env`
-value is the environment variable J.A.R.V.I.S. reads from `.env`.
+| Provider | `endpoint` example | Notes |
+|---|---|---|
+| **Ollama** | `http://localhost:11434/v1` | Free, local. Pull a tool-capable model. |
+| **LM Studio** | `http://localhost:1234/v1` | Free, local, GUI. |
+| **vLLM** | `http://localhost:8000/v1` | Self-hosted, fast. |
+| **OpenRouter** | `https://openrouter.ai/api/v1` | Hundreds of models, one key. |
+| **OpenAI** | `https://api.openai.com/v1` | GPT-4o etc. |
+| **Anthropic** | *(set `provider: anthropic`)* | Claude via Messages API. |
 
-## Main Folders
+For the best experience, pick a model with **strong native tool-calling**.
 
-```text
-jarvis/        Python backend, tools, agents, server routes
-web/           React HUD frontend
-docs/          Notes, research, model download instructions, screenshots
-data/          Local runtime state, ignored caches, generated media
-TripoSR/       Optional 3D generation submodule
-stable-fast-3d Optional 3D generation submodule
+---
+
+## 🎙️ Voice
+
+A complete, hands-free loop — engineered to feel like the films:
+
+- **Wake word** — say *"Hey JARVIS"* (fuzzy-matched, survives Whisper mishears like
+  "jarvis / jervis / charvis"). A follow-up window keeps the mic armed so you don't
+  repeat it every sentence.
+- **Server-side STT** — [faster-whisper](https://github.com/SYSTRAN/faster-whisper) with
+  VAD, hallucination filtering, and clip **coalescing** (a mid-sentence pause won't split
+  your command into two).
+- **"Mute mic except cancel"** — while JARVIS speaks, the mic is muted to commands; say
+  **"cancel"** (or "stop talking", "nevermind") and the speech cuts instantly.
+- **Time-aware greeting** — boots up with *"Good morning/afternoon/evening, sir."*
+- **Cinematic TTS**, in priority order:
+
+| Tier | Engine | Voice |
+|---|---|---|
+| 1 | **Piper** (local) | `jgkawell/jarvis` ONNX — closest to the Paul-Bettany MCU voice |
+| 2 | **NVIDIA Riva** (cloud) | needs `NVIDIA_API_KEY` |
+| 3 | **Edge TTS** (fallback) | `en-GB-ThomasNeural` / `RyanNeural` — deep British male |
+
+The persona is a **concise British butler-AI**: status → diagnosis → recommended action.
+Addresses you as "sir", anticipates the next step, never rambles.
+
+---
+
+## 🧠 Memory & Intelligence
+
+Everything is stored **locally** in SQLite — nothing leaves your machine.
+
+- **Semantic recall** — embeddings (e.g. `nomic-embed-text`) give true cross-session
+  memory; gracefully falls back to keyword search if embeddings are unavailable.
+- **Stores** preferences, free-form notes, known fixes for recurring errors, labeled
+  paths, installed tools, and your most-used commands.
+- **Neural Galaxy** — say *"show me what you remember"* and your entire memory store
+  blooms as an interactive 3D point cloud, clustered by category.
+- **Context compaction** keeps long sessions coherent without blowing the token budget.
+- **Autonomous planning** — for complex goals, JARVIS runs a **plan → execute → reflect**
+  loop, surfaced live in the Plan panel.
+- **Proactive suggestions** — after each action it offers the next likely step.
+
+All of the above is toggleable under `ultimate:` in `config.yaml`.
+
+---
+
+## 🖼️ Local Media Generation
+
+### Images — FLUX.2-klein-4B
+Black Forest Labs' fastest distilled model, run from a **Q6_K GGUF** (~3.3 GB on disk):
+
+- 4-step rectified-flow → **seconds per image** on a 16 GB GPU
+- Smart `model_cpu_offload` keeps the ~8 GB text encoder from over-committing VRAM
+  (no silent PCIe sysmem spill = no 100× slowdowns)
+- Apache 2.0 — yours to use
+- Just say *"generate / draw / render an image of …"* — the picture lands in the Media Bay
+
+### 3D — TRELLIS.2 / Hunyuan3D
+Turn **any** image (generated, webcam, or uploaded) into a **textured GLB**:
+
+- **TRELLIS.2-4B FP8** in an isolated Python 3.12 worker (quantized, high quality, ungated)
+- **Hunyuan3D-2 mini turbo** (0.6 B) as a compact local shape path
+- `text_to_3d` (prompt → image → model in one shot) or `image_to_3d`
+- Renders inline in the Media Bay via `<model-viewer>` — rotate, zoom, inspect
+
+The VRAM manager automatically evicts FLUX and Whisper from the GPU before a 3D job
+takes over, so everything coexists on a single card.
+
+---
+
+## 🛠️ The Tool Belt
+
+~80 tools across 12 plugin groups. JARVIS picks the right one automatically.
+
+<details>
+<summary><b>📁 Files &amp; Code</b></summary>
+
+`list_dir` · `read_file` · `write_file` (auto-backup) · `append_file` · `search_files` ·
+`mkdir` · `copy` · `move` · `delete` · `stat` · `run_python` · `run_python_file` ·
+`run_node` · `pip_install` · `npm_install` · `scan_project` · `code_debug_loop`
+</details>
+
+<details>
+<summary><b>💻 Shell &amp; System</b></summary>
+
+`run_shell` · `run_powershell` · `which` · `env_var` · `system_status` ·
+`list_processes` · `network_info` · `battery` · `gpu_info` · `disk_usage` · `kill_process`
+</details>
+
+<details>
+<summary><b>🌐 Web &amp; Browser</b></summary>
+
+`web_search` · `image_search` · `video_search` · `web_fetch` · `open_inline` ·
+`media_show` · `browser_open` · `browser_search` · `browser_page_text` ·
+`browser_click_text` · `browser_type` · `browser_press` · `browser_screenshot` ·
+`browser_close` *(visible Playwright Chromium)*
+</details>
+
+<details>
+<summary><b>👁️ Vision</b></summary>
+
+`webcam_see` (snapshot + multimodal analysis) · `webcam_show` (live preview) ·
+`webcam_snapshot` · `screenshot` · `screen_ocr` · `ocr_image` · `analyze_image` ·
+`webcam_status`
+</details>
+
+<details>
+<summary><b>🧠 Memory</b></summary>
+
+`remember` · `recall` · `forget` · `list_prefs` · `add_note` · `list_notes` ·
+`search_memory` · `set_path` · `get_path` · `list_paths` · `record_tool` ·
+`list_tools` · `add_fix` · `lookup_fix` · `top_commands` · `memory_galaxy`
+</details>
+
+<details>
+<summary><b>🎨 Media &amp; Agents</b></summary>
+
+`image_generate` · `image_to_3d` · `text_to_3d` · `agent_backend_run`
+(delegate to Claude Code / Codex / OpenCode) · plus optional `speak` · `listen` ·
+`send_email` · `add_event` · Home-Assistant smart-home control
+</details>
+
+---
+
+## 🤖 Agent Swarm
+
+Behind the butler sits a **9-role agent matrix**, visible in the Swarm panel:
+
+```
+Planner → Executor → Research → Code → File → System → Memory → Vision → Voice
 ```
 
-If submodules are missing after cloning:
+For long-running goals ("run until you finish X"), JARVIS delegates to installed
+CLI backends — **Claude Code**, **Codex**, or **OpenCode** — and streams their progress
+straight into the HUD.
 
-```bat
-git submodule update --init --recursive
+---
+
+## 🪟 The HUD
+
+A genuinely cinematic interface, not a reskin of a chat window:
+
+- **Arc-reactor core** + concentric **reactive rings** that pulse with JARVIS's voice
+- **Voice-reactive orb** driven by live mic amplitude
+- **Boot sequence** on every launch (kernel init → voice profile → uplink → ready)
+- **Live panels** — subsystems telemetry, terminal feed, system log, mission log,
+  ambient telemetry, plan + swarm status
+- **Media Bay** — image cards, embedded video, inline web pages, article reader,
+  3D model viewer, webcam feed, lightbox
+- **Mouse-parallax depth** so the whole HUD floats in 3D space
+
+Built with **React 18 · TypeScript · Three.js** (`@react-three/fiber` + `drei`) ·
+**Framer Motion · Zustand · TailwindCSS · Vite · Electron**.
+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+flowchart LR
+    subgraph Desktop["🖥️ Electron Desktop App"]
+        UI["React + Three.js HUD<br/>Orb · Arc Reactor · Media Bay"]
+    end
+    subgraph Backend["⚙️ FastAPI Backend :7341"]
+        WS["WebSocket chat + events"]
+        ORCH["Orchestrator<br/>agents · plan/reflect · permissions"]
+        TOOLS["80+ Tool Plugins"]
+        MEM["SQLite Memory<br/>+ embeddings"]
+        VRAM["VRAM Manager<br/>GPU arbitration"]
+    end
+    subgraph Models["🧬 Local Models (lazy)"]
+        LLM["Your LLM<br/>OpenAI-compat / Anthropic"]
+        FLUX["FLUX.2-klein<br/>image"]
+        T3D["TRELLIS.2 / Hunyuan3D<br/>3D"]
+        WHISP["faster-whisper<br/>STT"]
+        TTS["Piper / Riva / Edge<br/>TTS"]
+    end
+
+    UI <-->|WebSocket| WS --> ORCH
+    ORCH --> TOOLS --> MEM
+    ORCH --> LLM
+    TOOLS --> FLUX & T3D & WHISP & TTS
+    VRAM -. arbitrates .-> FLUX & T3D & WHISP
 ```
 
-## Safety Model
+---
 
-J.A.R.V.I.S. separates tool calls into:
+## 🔒 Safety Model
 
-- `SAFE`: read-only or low-risk actions.
-- `CAUTION`: actions that need confirmation.
-- `DANGEROUS`: actions that require explicit approval or are refused.
+Every tool is tiered and gated:
 
-Actions are logged locally under `data/logs/`, and file edits are backed up
-under `data/backups/`.
+| Tier | Behavior |
+|---|---|
+| 🟢 **SAFE** | Read-only / low-risk — runs automatically. |
+| 🟡 **CAUTION** | Needs confirmation. |
+| 🔴 **DANGEROUS** | Explicit approval, or refused outright. |
 
-## Useful Commands
+- A hard **denylist** blocks catastrophic commands (`rm -rf /`, `format c:`, fork bombs…)
+  regardless of mode.
+- Every action is logged to `data/logs/actions.jsonl`.
+- Every file edit is **backed up** under `data/backups/` (keeps the last 50).
+- Permission posture is configurable: `safe` · `confirm` · `auto` · `bypass`.
 
-```text
-/help        Show commands
-/tools       List tools
-/agents      List agent personas
-/memory ...  Search local memory
-/mission ... Pin a project as the current focus
-/reset       Clear the in-memory chat
+> ⚠️ This is a powerful local agent with real access to your machine. Review the
+> permission mode in `config.yaml` before pointing it at sensitive files or systems.
+
+---
+
+## ⌨️ Command Bar
+
+```
+/help        Show commands              /memory ...  Search local memory
+/tools       List all tools            /mission ... Pin a project as focus
+/agents      List agent personas       /reset       Clear the in-memory chat
 ```
 
-## Notes
+---
 
-- Python virtual environments, `node_modules`, `.env`, logs, local memory,
-  screenshots, generated output, reference/runtime images, and large model
-  binaries are ignored by Git.
-- This is a local desktop assistant project. Review tools and permissions
-  before using it on sensitive files or systems.
+## 📦 Model Assets
+
+Large weights are **not** committed — they download lazily on first use. See the
+[**Model Asset Guide**](docs/MODEL_ASSETS.md).
+
+- FLUX GGUF → `data/models/`
+- Piper voice → `data/voices/` ([jgkawell/jarvis](https://huggingface.co/jgkawell/jarvis))
+- TRELLIS.2 / Hunyuan3D → auto-fetched into `data/models/` by their workers
+
+---
+
+## 🗂️ Project Layout
+
+```
+jarvis/        Python backend — server routes, orchestrator, agents, tool plugins
+web/           React + Three.js HUD frontend
+electron/      Desktop shell
+docs/          Model download guide, research notes, screenshots
+data/          Local runtime state — memory.db, logs, backups, generated media (git-ignored)
+config.yaml    All configuration (persona, model, voice, permissions, plugins)
+.env           Secrets (git-ignored)
+```
+
+---
+
+## 🛣️ Roadmap / Ideas
+
+- [ ] Linux / macOS launch scripts
+- [ ] More image models in the command-bar switcher
+- [ ] Voice-cloning for a fully custom TTS profile
+- [ ] Plugin marketplace / hot-reload
+
+---
+
+<div align="center">
+
+**Built for the lab. Powered by your own hardware.**
+
+*"Subsystems nominal. Standing by, sir."*
+
+</div>
