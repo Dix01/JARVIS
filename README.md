@@ -26,6 +26,16 @@ your own GPU, remembers everything across sessions, and commands your PC through
 
 <br/>
 
+[![Star on GitHub](https://img.shields.io/github/stars/Dix01/JARVIS?style=social)](https://github.com/Dix01/JARVIS/stargazers)
+&nbsp;&nbsp;
+[![Fork on GitHub](https://img.shields.io/github/forks/Dix01/JARVIS?style=social)](https://github.com/Dix01/JARVIS/fork)
+
+**Your own Iron-Man AI — voice, vision, image + 3D gen, 80+ tools, 100% on your hardware.**
+<br/>
+[⭐ Star it](https://github.com/Dix01/JARVIS) if you'd run this on your machine.
+
+<br/>
+
 ![J.A.R.V.I.S. HUD](docs/images/dashboard.png)
 
 </div>
@@ -49,6 +59,20 @@ You:    "Hey JARVIS, generate a chrome helmet on a black background, then make i
 JARVIS: "Right away, sir."  →  FLUX renders the image  →  TRELLIS lifts it into a
         rotatable GLB hologram in the Media Bay. ~Seconds, fully local, on your GPU.
 ```
+
+---
+
+## 🌌 Why JARVIS?
+
+Cloud assistants rent you intelligence and read your data. JARVIS doesn't.
+
+- **🔒 100% local-first** — your voice, webcam, files, and memory never leave the machine. No telemetry, no account, no "your chats may be reviewed to improve our models."
+- **💸 No subscription** — bring a model you already run (Ollama · LM Studio · vLLM) or a key you control. No monthly seat, no per-token meter.
+- **🧰 It actually *does* things** — not a chat window. It runs code, drives a real browser, sees through your camera, generates images and 3D models, and remembers — across 80+ tools.
+- **🎬 It feels like the films** — wake word, British-butler voice, holographic HUD, arc-reactor core. Built to be lived in, not just demoed once.
+- **🪟 Yours to hack** — open, plugin-based, fully inspectable. Add a new tool in a single file.
+
+> The whole point: an assistant as capable as the cloud ones — that you actually **own**.
 
 ---
 
@@ -409,6 +433,29 @@ config.yaml    All configuration (persona, model, voice, permissions, plugins)
 - [ ] More image models in the command-bar switcher
 - [ ] Voice-cloning for a fully custom TTS profile
 - [ ] Plugin marketplace / hot-reload
+
+---
+
+## ⭐ Star History
+
+If JARVIS made you smile, a star helps the next person building their own lab find it.
+
+<div align="center">
+
+<a href="https://star-history.com/#Dix01/JARVIS&Date">
+  <img src="https://api.star-history.com/svg?repos=Dix01/JARVIS&type=Date" alt="Star History Chart" width="640">
+</a>
+
+<br/><br/>
+
+**Spread the word →**
+[Share on X](https://twitter.com/intent/tweet?text=JARVIS%20%E2%80%94%20a%20100%25%20local%20Iron-Man%20AI%20with%20voice%2C%20vision%2C%20image%20%2B%203D%20generation%20and%2080%2B%20tools.%20Runs%20on%20your%20own%20GPU.&url=https://github.com/Dix01/JARVIS)
+·
+[Reddit](https://www.reddit.com/submit?url=https://github.com/Dix01/JARVIS&title=JARVIS%20%E2%80%94%20a%20fully%20local%20Iron-Man%20AI%20assistant)
+·
+[Hacker News](https://news.ycombinator.com/submitlink?u=https://github.com/Dix01/JARVIS&t=JARVIS%20%E2%80%94%20a%20fully%20local%20Iron-Man%20AI%20assistant)
+
+</div>
 
 ---
 
