@@ -16,6 +16,7 @@ import Settings from "./components/HUD/Settings";
 import Subsystems from "./components/HUD/Subsystems";
 import SwarmPanel from "./components/HUD/SwarmPanel";
 import TopBar from "./components/HUD/TopBar";
+import UptimePanel from "./components/HUD/UptimePanel";
 import Widget from "./components/HUD/Widget";
 import MediaHub from "./components/Media/MediaHub";
 import Orb from "./components/Orb/Orb";
@@ -32,6 +33,8 @@ import { getHealth } from "./lib/api";
 import { useStore, nextId, type MediaKind } from "./lib/store";
 import { refreshVoiceProfile, streamSpeak } from "./lib/voice";
 import { wsClient } from "./lib/ws";
+
+const GREETING_SESSION_KEY = "jarvis.greeting.sent.v1";
 
 /**
  * Default panel positions. Recomputed at first load for current viewport.
@@ -50,6 +53,7 @@ function defaults() {
     diag:      { x: M, y: TOP, w: colL, h: 260 },
     subs:      { x: M, y: TOP + 268, w: colL, h: 360 },
     terminal:  { x: M, y: TOP + 268 + 368, w: colL, h: Math.max(180, H - TOP - 268 - 368 - BOTTOM) },
+    uptime:    { x: M + colL + 12, y: TOP, w: 220, h: 136 },
     chat:      { x: W - colR - M, y: TOP, w: colR, h: halfH * 2 - 200 },
     mission:   { x: W - colR - M, y: H - BOTTOM - 200 - 8 - 110, w: colR, h: 110 },
     toolFeed:  { x: W - colR - M, y: H - BOTTOM - 200, w: colR, h: 200 },
@@ -74,11 +78,38 @@ function defaults() {
   };
 }
 
+function useViewport() {
+  const [viewport, setViewport] = useState(() => ({
+    w: typeof window !== "undefined" ? window.innerWidth : 1200,
+    h: typeof window !== "undefined" ? window.innerHeight : 800,
+  }));
+
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      setViewport({ w: window.innerWidth, h: window.innerHeight });
+    };
+    const onResize = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(update);
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return viewport;
+}
+
 export default function App() {
   const setHealth = useStore((s) => s.setHealth);
   const media = useStore((s) => s.media);
   const shellMode = useStore((s) => s.shellMode);
   const setShellMode = useStore((s) => s.setShellMode);
+  const viewport = useViewport();
   const hiddenRef = useRef(false);
   const lastMediaLenRef = useRef(0);
 
@@ -153,6 +184,10 @@ export default function App() {
     const h = new Date().getHours();
     const part = h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
     const text = `Good ${part}, sir. All systems are online and at your service.`;
+    try {
+      if (sessionStorage.getItem(GREETING_SESSION_KEY) === "1") return;
+      sessionStorage.setItem(GREETING_SESSION_KEY, "1");
+    } catch { /* noop */ }
     // Small beat so it lands after the boot overlay finishes fading out.
     const t = setTimeout(() => {
       pushChat({ id: nextId(), role: "assistant", text, ts: Date.now() });
@@ -176,6 +211,42 @@ export default function App() {
         <Atmosphere />
         <Widget />
         <ConfirmModal />
+        <BootSequence />
+      </div>
+    );
+  }
+
+  if (viewport.w < 900) {
+    return (
+      <div className="relative w-screen h-screen overflow-hidden">
+        <Atmosphere />
+        <Orb />
+        <CornerFrame />
+        <TopBar />
+        <StatusBar />
+
+        <div className="fixed left-4 right-4 top-[76px] z-20 grid h-[136px] grid-cols-[minmax(0,1fr)_minmax(168px,190px)] gap-3 pointer-events-auto">
+          <div className="min-w-0 overflow-hidden">
+            <DiagPanel />
+          </div>
+          <UptimePanel />
+        </div>
+
+        <div className="fixed left-4 right-4 top-[224px] bottom-[136px] z-20 min-h-[260px] pointer-events-auto">
+          <ChatPanel />
+        </div>
+
+        <div className="fixed left-4 right-4 bottom-16 z-30 h-[72px] pointer-events-auto">
+          <CommandBar />
+        </div>
+
+        <Reticle />
+        <Suspense fallback={null}>
+          <Lightbox />
+          <ArticleReader />
+        </Suspense>
+        <ConfirmModal />
+        <DropZone />
         <BootSequence />
       </div>
     );
@@ -225,6 +296,7 @@ export default function App() {
 
       {/* Floating, movable + resizable panels */}
       <Floating id="diag"     defaultBox={D.diag}     minW={260} minH={180}><DiagPanel /></Floating>
+      <Floating id="uptime"   defaultBox={D.uptime}   minW={180} minH={118}><UptimePanel /></Floating>
       <Floating id="subs"     defaultBox={D.subs}     minW={260} minH={220}><Subsystems /></Floating>
       <Floating id="terminal" defaultBox={D.terminal} minW={260} minH={180}><TerminalPanel /></Floating>
 
