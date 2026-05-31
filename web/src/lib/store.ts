@@ -266,6 +266,23 @@ interface StoreState {
 let _id = 0;
 export const nextId = () => `${Date.now().toString(36)}-${(_id++).toString(36)}`;
 
+const BOOT_GREETING_RE =
+  /^Good (morning|afternoon|evening), sir\. All systems are online and at your service\.$/;
+
+function isBootGreeting(entry: ChatEntry) {
+  return entry.role === "assistant" && BOOT_GREETING_RE.test(entry.text.trim());
+}
+
+function dedupeBootGreetings(chat: ChatEntry[]) {
+  let seen = false;
+  return chat.filter((entry) => {
+    if (!isBootGreeting(entry)) return true;
+    if (seen) return false;
+    seen = true;
+    return true;
+  });
+}
+
 // Session archive. On a cold launch — reboot or app relaunch — the previous
 // session is stashed under PREV_SESSION_KEY instead of auto-reopening. We tell
 // a cold launch from an in-app reload via SESSION_ALIVE_KEY: sessionStorage is
@@ -283,7 +300,11 @@ export const useStore = create<StoreState>()(persist((set) => ({
   audioLevel: 0,
   setAudioLevel: (v) => set({ audioLevel: v }),
   chat: [],
-  pushChat: (e) => set((st) => ({ chat: [...st.chat, e].slice(-400) })),
+  pushChat: (e) =>
+    set((st) => {
+      if (isBootGreeting(e) && st.chat.some(isBootGreeting)) return {};
+      return { chat: [...st.chat, e].slice(-400) };
+    }),
   clearChat: () => set({ chat: [] }),
   appendChatText: (id, piece) =>
     set((st) => ({
@@ -441,7 +462,7 @@ export const useStore = create<StoreState>()(persist((set) => ({
       if (!raw) { set({ prevSessionAvailable: false }); return; }
       const prev = JSON.parse(raw);
       set({
-        chat:   (prev.chat   || []).map((c: ChatEntry) => ({ ...c, streaming: false })),
+        chat:   dedupeBootGreetings((prev.chat || []).map((c: ChatEntry) => ({ ...c, streaming: false }))),
         media:  prev.media  || [],
         tools:  prev.tools  || [],
         swarms: (prev.swarms || []).map((s: SwarmRun) => ({ ...s, active: false })),
@@ -476,7 +497,7 @@ export const useStore = create<StoreState>()(persist((set) => ({
   onRehydrateStorage: () => (state) => {
     if (!state) return;
     if (state.chat?.length) {
-      state.chat = state.chat.map((c) => ({ ...c, streaming: false }));
+      state.chat = dedupeBootGreetings(state.chat.map((c) => ({ ...c, streaming: false })));
     }
     // Cold launch (reboot / app relaunch) vs in-app reload. No alive marker ⇒
     // fresh process ⇒ don't auto-reopen the prior session; stash it for an
