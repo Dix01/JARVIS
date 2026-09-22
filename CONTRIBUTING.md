@@ -125,6 +125,22 @@ enforced regardless of tier — don't try to route around it.
   never wipes. Keep that invariant.
 - Keep TypeScript strict-clean: `cd web && npm run build` should pass.
 
+### Wake-word regression checks
+
+With the backend dependencies and frontend dependencies installed:
+
+```sh
+# From the repository root: config validation and /api/health contract
+python -m unittest discover -s tests -v
+
+# From web/: default/custom phrase matching and frontend type/build checks
+npm test
+npm run build
+```
+
+These checks do not require a microphone, model downloads, or an API key.
+Verify real speech recognition separately with your chosen wake phrase.
+
 ---
 
 ## Style

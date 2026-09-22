@@ -71,6 +71,7 @@ export interface Health {
   tools: number;
   agents: string[];
   permission_mode: string;
+  voice?: { wake_word: string };
 }
 
 export interface VoiceProfile {

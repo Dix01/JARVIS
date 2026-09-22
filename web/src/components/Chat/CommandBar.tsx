@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useStore, nextId, type ChatAttachment } from "../../lib/store";
 import { wsClient } from "../../lib/ws";
 import { mic } from "../../lib/voice";
+import { normalizeWakeWord } from "../../lib/wakeWord";
 import ImageActions from "./ImageActions";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -16,6 +17,7 @@ export default function CommandBar() {
   const wakeEnabled = useStore((s) => s.wakeEnabled);
   const setWakeEnabled = useStore((s) => s.setWakeEnabled);
   const micStatus = useStore((s) => s.micStatus);
+  const wakeWord = useStore((s) => normalizeWakeWord(s.health?.voice?.wake_word));
   const voiceEnabled = useStore((s) => s.voiceEnabled);
   const setVoiceEnabled = useStore((s) => s.setVoiceEnabled);
   const voiceProfile = useStore((s) => s.voiceProfile);
@@ -253,7 +255,7 @@ export default function CommandBar() {
 
       {(wakeEnabled || micStatus) && (
         <div className="px-3 pb-1.5 text-[10px] text-mono text-jarvis-cyan/50 shrink-0">
-          {micStatus ? `mic: ${micStatus}` : 'listening · say "Hey JARVIS" to wake'}
+          {micStatus ? `mic: ${micStatus}` : `listening · say “${wakeWord}” to wake`}
         </div>
       )}
     </div>

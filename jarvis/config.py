@@ -11,7 +11,7 @@ from typing import Any
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "config.yaml"
@@ -138,6 +138,16 @@ class UltimateConfig(BaseModel):
 
 
 class VoiceConfig(BaseModel):
+    wake_word: str = "Hey JARVIS"
+
+    @field_validator("wake_word")
+    @classmethod
+    def normalize_wake_word(cls, value: str) -> str:
+        value = " ".join(value.split())
+        if not value:
+            raise ValueError("wake_word must not be blank")
+        return value
+
     provider: str = "auto"  # auto | piper | edge_tts | nvidia_riva
     edge_voice: str = "en-GB-ThomasNeural"
     edge_rate: str = "-6%"
