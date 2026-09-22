@@ -11,7 +11,11 @@ function isDefaultWakeWord(value: string): boolean {
 
 function customWakePattern(value: string, leadingOnly = false): RegExp {
   const phrase = normalizeWakeWord(value);
-  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
+  // STT can insert commas or sentence punctuation between spoken words.
+  // Escape each configured token first so its own punctuation stays literal.
+  const escaped = phrase.split(/\s+/)
+    .map((token) => token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("[\\s,.:!?;，。！？、：；…—–-]+");
   // Chinese/Japanese transcripts may join the wake phrase and command.
   // Other phrases need word boundaries to avoid matching inside words.
   const unspaced = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u;

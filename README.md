@@ -201,8 +201,10 @@ A complete, hands-free loop — engineered to feel like the films:
   ```
 
   Edit the existing `voice` section, then restart the backend and reload the app.
-  Custom phrases replace the JARVIS aliases and match literally, ignoring case
-  and repeated whitespace. A leading wake phrase is removed from the command;
+  Custom phrases replace the JARVIS aliases. Matching ignores case and accepts
+  whitespace or common transcription punctuation between words: `Hey, Friday`
+  also matches `Hey Friday`. Punctuation in the configured phrase stays literal.
+  A leading wake phrase is removed from the command;
   saying only the phrase opens the follow-up window. Unicode phrases such as
   `贾维斯` are supported by the matcher if STT transcribes them correctly.
   Missing configuration defaults to `Hey JARVIS` with the existing fuzzy aliases;

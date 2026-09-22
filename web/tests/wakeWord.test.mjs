@@ -33,12 +33,30 @@ test("custom phrase replaces JARVIS and matches case and whitespace variations",
   assert.equal(detectWake("Hey Fridaz", "Hey Friday"), false);
 });
 
+test("transcription punctuation can separate words in a custom phrase", () => {
+  for (const phrase of ["Hey, Friday", "Hey. Friday", "Hey—Friday", "Hey，Friday", "HEY...  FRIDAY"]) {
+    assert.equal(detectWake(`${phrase}, open the browser`, "Hey Friday"), true, phrase);
+    assert.equal(stripWakeWord(`${phrase}, open the browser`, "Hey Friday"), "open the browser", phrase);
+    assert.equal(stripWakeWord(`${phrase}!`, "Hey Friday"), "", phrase);
+  }
+  // Punctuation must not turn this into substring or fuzzy matching.
+  for (const text of ["HeyFriday", "Hey, Fridays", "xHey, Friday", "Hey, next Friday", "Hey, Fridaz"]) {
+    assert.equal(detectWake(text, "Hey Friday"), false, text);
+    assert.equal(stripWakeWord(text, "Hey Friday"), text, text);
+  }
+  assert.equal(detectWake("please, Hey, Friday, help", "Hey Friday"), true);
+  assert.equal(stripWakeWord("please, Hey, Friday, help", "Hey Friday"), "please, Hey, Friday, help");
+});
+
 test("custom phrases are literal, including regular expression characters", () => {
   assert.equal(detectWake("Assistant+, hello", "Assistant+"), true);
   assert.equal(stripWakeWord("Assistant+, hello", "Assistant+"), "hello");
   assert.equal(detectWake("Assistant hello", "Assistant+"), false);
   assert.equal(detectWake("any speech", ".*"), false);
   assert.equal(detectWake("A[1], hello", "A[1]"), true);
+  assert.equal(detectWake("Hey, Assistant+, hello", "Hey Assistant+"), true);
+  assert.equal(stripWakeWord("Hey, Assistant+, hello", "Hey Assistant+"), "hello");
+  assert.equal(detectWake("Hey, Assistant, hello", "Hey Assistant+"), false);
 });
 
 test("Unicode phrases and punctuation are retained correctly", () => {
