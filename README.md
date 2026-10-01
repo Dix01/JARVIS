@@ -193,6 +193,23 @@ A complete, hands-free loop — engineered to feel like the films:
 - **Wake word** — say *"Hey JARVIS"* (fuzzy-matched, survives Whisper mishears like
   "jarvis / jervis / charvis"). A follow-up window keeps the mic armed so you don't
   repeat it every sentence.
+  Set `voice.wake_word` in `config.yaml` to use a different phrase, for example:
+
+  ```yaml
+  voice:
+    wake_word: "Hey Friday"
+  ```
+
+  Edit the existing `voice` section, then restart the backend and reload the app.
+  Custom phrases replace the JARVIS aliases. Matching ignores case and accepts
+  whitespace or common transcription punctuation between words: `Hey, Friday`
+  also matches `Hey Friday`. Punctuation in the configured phrase stays literal.
+  A leading wake phrase is removed from the command;
+  saying only the phrase opens the follow-up window. Unicode phrases such as
+  `贾维斯` are supported by the matcher if STT transcribes them correctly.
+  Missing configuration defaults to `Hey JARVIS` with the existing fuzzy aliases;
+  blank phrases are rejected. Avoid phrases reserved for sleep/cancel commands
+  or filtered as speech noise (for example `go to sleep`, `cancel`, or `thanks`).
 - **Server-side STT** — [faster-whisper](https://github.com/SYSTRAN/faster-whisper) with
   VAD, hallucination filtering, and clip **coalescing** (a mid-sentence pause won't split
   your command into two).

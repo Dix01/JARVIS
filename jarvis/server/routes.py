@@ -419,6 +419,7 @@ async def health(request: Request):
         "tools": len(registry.all_tools()),
         "agents": agents.names(),
         "permission_mode": cfg.permissions.mode,
+        "voice": {"wake_word": cfg.voice.wake_word},
     }
 
 

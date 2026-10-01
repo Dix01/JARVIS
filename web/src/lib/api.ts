@@ -2,6 +2,7 @@ import type { Health, SystemStats } from "./store";
 
 export async function getHealth(): Promise<Health> {
   const r = await fetch("/api/health");
+  if (!r.ok) throw new Error(`Health request failed: ${r.status}`);
   return r.json();
 }
 

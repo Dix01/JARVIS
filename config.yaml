@@ -186,6 +186,8 @@ ui:
   refresh_interval_ms: 1500
 
 voice:
+  # Phrase that wakes the microphone (restart backend after changing).
+  wake_word: "Hey JARVIS"
   # JARVIS TTS preference order (auto = first that initialises):
   #   1. piper   — community Paul-Bettany-style model (jgkawell/jarvis).
   #                Closest to the real JARVIS voice. Local, free, fan-use only.

@@ -4,6 +4,12 @@
  * Degrades silently if the API is missing.
  */
 import { useStore, type VoiceProfile } from "./store";
+import { getHealth } from "./api";
+import { detectWake, stripWakeWord, normalizeWakeWord } from "./wakeWord";
+
+function configuredWakeWord(): string {
+  return normalizeWakeWord(useStore.getState().health?.voice?.wake_word);
+}
 
 // --- TTS ---
 const SYNTH = typeof window !== "undefined" ? window.speechSynthesis : null;
@@ -469,7 +475,7 @@ export function stopSpeaking() {
 
 // --- STT (Server-side via MediaRecorder + /api/stt) ---
 // Wake-word gated: every utterance is transcribed, but ONLY utterances
-// that contain "jarvis" / "hey jarvis" are forwarded to the chat. Other
+// that contain the configured wake phrase are forwarded to the chat. Other
 // speech is discarded silently so the model never reacts to ambient talk.
 // Once awake the mic stays "armed" for FOLLOWUP_WINDOW_MS so quick
 // follow-ups don't need to repeat the wake word.
@@ -511,77 +517,6 @@ const FOLLOWUP_REPLY_MS = 20_000;
 // mid-sentence pause doesn't fire twice (the 2nd request cancelling the 1st).
 const STT_COALESCE_MS = 800;
 const SLEEP_PHRASES = /\b(?:stop listening|go to sleep|jarvis stop|sleep mode|nevermind|never mind|that's all|that is all)\b/i;
-
-// --- Fuzzy wake-word detection ----------------------------------------------
-// Whisper often mishears "jarvis" as jorvis / jervis / jurvis / charvis /
-// jarvus / javis / jarvises / yarvis / harvis ... We accept any token that
-// is close enough by either:
-//   1. shape regex:  j → vowel → optional r → v → vowel → s
-//   2. Levenshtein distance ≤ 2 from "jarvis"
-//   3. starts with a soft "j/y/h/ch" cluster + jarvis-ish tail
-// Plus the canonical phrases (hey jarvis, ok jarvis, etc).
-const WAKE_SHAPE_RE = /\b(?:hey|ok|okay|yo|hi|ay)?\s*(?:[jyhc]h?|ch)[aeiouy]+r?[vb][aeiouy]+s+(?:es|is)?\b/i;
-const WAKE_STRICT_RE = /\b(?:hey|ok|okay|yo|hi|ay)?\s*j\.?a\.?r\.?v\.?i\.?s\.?\b/i;
-
-function levenshtein(a: string, b: string): number {
-  a = a.toLowerCase(); b = b.toLowerCase();
-  if (a === b) return 0;
-  const m = a.length, n = b.length;
-  if (!m) return n; if (!n) return m;
-  const dp: number[] = Array(n + 1);
-  for (let j = 0; j <= n; j++) dp[j] = j;
-  for (let i = 1; i <= m; i++) {
-    let prev = dp[0]; dp[0] = i;
-    for (let j = 1; j <= n; j++) {
-      const tmp = dp[j];
-      dp[j] = a[i - 1] === b[j - 1]
-        ? prev
-        : 1 + Math.min(prev, dp[j], dp[j - 1]);
-      prev = tmp;
-    }
-  }
-  return dp[n];
-}
-
-function isJarvisLike(token: string): boolean {
-  const t = token.toLowerCase().replace(/[^a-z]/g, "");
-  if (!t || t.length < 4 || t.length > 9) return false;
-  // Common phonetic family
-  if (/^[jyhc]h?[aeiouy]+r?[vb][aeiouy]+s+(?:es|is)?$/.test(t)) return true;
-  // Edit distance from canonical
-  return levenshtein(t, "jarvis") <= 2;
-}
-
-function detectWake(text: string): boolean {
-  if (WAKE_STRICT_RE.test(text) || WAKE_SHAPE_RE.test(text)) return true;
-  // Token-level Levenshtein fallback — catches odd Whisper outputs like
-  // "Jarves," "Jervis," "Charvis," "Yarvis," etc.
-  for (const tok of text.split(/[\s,.\!\?\-:;'"]+/)) {
-    if (isJarvisLike(tok)) return true;
-  }
-  return false;
-}
-
-function stripWakeWord(text: string): string {
-  // Strip strict match first
-  let out = text.replace(/^\s*(?:hey|ok|okay|yo|hi|ay)?\s*j\.?a\.?r\.?v\.?i\.?s\.?[\s,.\-:!?]*/i, "");
-  if (out !== text) return out.trim();
-  // Strip fuzzy first-token if Jarvis-like
-  const m = out.match(/^\s*(\S+)[\s,.\-:!?]*/);
-  if (m && isJarvisLike(m[1])) {
-    out = out.slice(m[0].length);
-    // Also peel a leading filler like "hey/ok"
-    const m2 = out.match(/^\s*(\S+)[\s,.\-:!?]*/);
-    if (m2 && /^(?:hey|ok|okay|yo|hi|ay)$/i.test(m2[1])) {
-      out = out.slice(m2[0].length);
-    }
-  } else {
-    // Strip leading filler then fuzzy
-    const mf = out.match(/^\s*(hey|ok|okay|yo|hi|ay)\s+(\S+)[\s,.\-:!?]*/i);
-    if (mf && isJarvisLike(mf[2])) out = out.slice(mf[0].length);
-  }
-  return out.trim();
-}
 
 export class JarvisMic {
   private analyser: AnalyserNode | null = null;
@@ -698,6 +633,15 @@ export class JarvisMic {
   }
 
   private async _initAudio() {
+    // Load configuration before accepting speech, including on first startup.
+    try {
+      useStore.getState().setHealth(await getHealth());
+      if (!this._wantListening) return;
+    } catch {
+      this._wantListening = false;
+      useStore.getState().setMicStatus("cannot load voice configuration — try again");
+      return;
+    }
     try {
       // Echo cancellation is what makes barge-in viable: it strips most of
       // JARVIS's own TTS out of the mic signal so we don't transcribe
@@ -916,12 +860,13 @@ export class JarvisMic {
         if (SLEEP_PHRASES.test(text)) {
           this._awakeUntil = 0;
           useStore.getState().setMicMode("dormant");
-          useStore.getState().setMicStatus("dormant — say “Hey JARVIS” to wake");
+          useStore.getState().setMicStatus(`dormant — say “${configuredWakeWord()}” to wake`);
           return;
         }
 
         const now = Date.now();
-        const hasWake = detectWake(text);
+        const wakeWord = configuredWakeWord();
+        const hasWake = detectWake(text, wakeWord);
         const inFollowup = now < this._awakeUntil;
 
         if (!hasWake && !inFollowup) {
@@ -930,14 +875,14 @@ export class JarvisMic {
           useStore.getState().setMicStatus(`(ignored) "${text.slice(0, 40)}"`);
           setTimeout(() => {
             if (this._wantListening && useStore.getState().micMode === "dormant") {
-              useStore.getState().setMicStatus("listening · say “Hey JARVIS”");
+              useStore.getState().setMicStatus(`listening · say “${configuredWakeWord()}”`);
             }
           }, 1200);
           return;
         }
 
         // Strip wake word so model sees just the command body.
-        const cleaned = stripWakeWord(text);
+        const cleaned = stripWakeWord(text, wakeWord);
         if (!cleaned) {
           // Bare wake word — arm short window, no submission.
           this._awakeUntil = now + FOLLOWUP_WAKE_MS;
@@ -968,7 +913,7 @@ export class JarvisMic {
               : "JARVIS speaking · mic muted",
           );
         } else {
-          useStore.getState().setMicStatus("listening · say “Hey JARVIS”");
+          useStore.getState().setMicStatus(`listening · say “${configuredWakeWord()}”`);
         }
       }
     }
