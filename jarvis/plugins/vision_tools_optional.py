@@ -33,7 +33,12 @@ def register(registry):
         from PIL import Image  # noqa: F401
         _ocr_ok = True
     except ImportError:
-        _ocr_ok = False
+        try:
+            from winrt.windows.media.ocr import OcrEngine  # noqa: F401
+            from PIL import Image  # noqa: F401
+            _ocr_ok = True
+        except ImportError:
+            _ocr_ok = False
 
     try:
         import cv2  # noqa: F401
@@ -72,28 +77,62 @@ def register(registry):
             "required": ["path"],
         },
     )
-    def ocr_image(path: str) -> str:
+    async def ocr_image(path: str) -> str:
         if not _ocr_ok:
-            return "pytesseract / Pillow not installed"
-        import os, pytesseract
+            return "OCR dependencies (pytesseract / winrt) and Pillow not installed"
+        import os
         from PIL import Image
         from ..utils.files import expand
-        # Auto-locate tesseract.exe on Windows if it isn't on PATH.
-        if os.name == "nt" and not pytesseract.pytesseract.tesseract_cmd:
-            for cand in (r"C:\Program Files\Tesseract-OCR\tesseract.exe",
-                         r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"):
-                if os.path.isfile(cand):
-                    pytesseract.pytesseract.tesseract_cmd = cand
-                    break
+
         p = expand(path)
         if not p.exists():
             return f"not found: {p}"
+
+        # 1. Try pytesseract if installed and tesseract binary is available
         try:
+            import pytesseract
+            if os.name == "nt" and not pytesseract.pytesseract.tesseract_cmd:
+                for cand in (r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+                             r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"):
+                    if os.path.isfile(cand):
+                        pytesseract.pytesseract.tesseract_cmd = cand
+                        break
             return pytesseract.image_to_string(Image.open(p))
-        except pytesseract.TesseractNotFoundError:
-            return ("tesseract binary not found on PATH. Install: "
-                    "winget install UB-Mannheim.TesseractOCR  "
-                    "(default path: C:\\Program Files\\Tesseract-OCR\\)")
+        except Exception:
+            pass
+
+        # 2. Native Windows WinRT hardware-accelerated OCR fallback (0 external binaries)
+        if os.name == "nt":
+            try:
+                import asyncio
+                from winrt.windows.media.ocr import OcrEngine
+                from winrt.windows.graphics.imaging import BitmapDecoder
+                from winrt.windows.storage.streams import InMemoryRandomAccessStream, DataWriter
+
+                with open(str(p), "rb") as f:
+                    img_data = f.read()
+
+                async def _winrt_run():
+                    stream = InMemoryRandomAccessStream()
+                    writer = DataWriter(stream)
+                    writer.write_bytes(img_data)
+                    await writer.store_async()
+                    await writer.flush_async()
+                    stream.seek(0)
+                    decoder = await BitmapDecoder.create_async(stream)
+                    software_bitmap = await decoder.get_software_bitmap_async()
+                    engine = OcrEngine.try_create_from_user_profile_languages()
+                    res = await engine.recognize_async(software_bitmap)
+                    return "\n".join([line.text for line in res.lines if line.text.strip()])
+
+                text = await _winrt_run()
+                if text.strip():
+                    return text.strip()
+            except Exception:
+                pass
+
+        return ("OCR failed: tesseract binary not found on PATH. Install via: "
+                "winget install UB-Mannheim.TesseractOCR (or install winrt-Windows.Media.Ocr)")
 
     @tool(
         name="screen_ocr",
@@ -102,10 +141,10 @@ def register(registry):
         parameters={"type": "object", "properties": {}},
         preview=lambda a: "screenshot + OCR",
     )
-    def screen_ocr() -> str:
+    async def screen_ocr() -> str:
         out = screenshot("ocr")
         if out.startswith("saved "):
-            return ocr_image(out[6:])
+            return await ocr_image(out[6:])
         return out
 
     @tool(

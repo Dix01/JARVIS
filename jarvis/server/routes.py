@@ -487,9 +487,15 @@ def _try_pynvml():
         _pynvml = pynvml
         return _pynvml
     except Exception as e:  # noqa: BLE001
-        _pynvml_failed = True
-        _gpu_log.info("pynvml unavailable (%s) — falling back to nvidia-smi", e)
-        return None
+        try:
+            import nvidia_ml_py as pynvml  # type: ignore
+            pynvml.nvmlInit()
+            _pynvml = pynvml
+            return _pynvml
+        except Exception as e2:  # noqa: BLE001
+            _pynvml_failed = True
+            _gpu_log.info("pynvml unavailable (%s, %s) — falling back to nvidia-smi", e, e2)
+            return None
 
 
 def _read_gpu() -> dict:

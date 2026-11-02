@@ -95,11 +95,32 @@ def register(registry):
 
     @tool(
         name="gpu_info",
-        description="Detected GPUs. NVIDIA stats if nvidia-smi is on PATH.",
+        description="Detected GPUs. NVIDIA stats via NVML (preferred) or nvidia-smi fallback.",
         permission=Permission.SAFE,
         parameters={"type": "object", "properties": {}},
     )
     async def gpu_info() -> str:
+        # Fast path: in-process NVML (sub-millisecond, no subprocess stall)
+        try:
+            try:
+                import pynvml
+                pynvml.nvmlInit()
+                nv = pynvml
+            except Exception:
+                import nvidia_ml_py as pynvml
+                pynvml.nvmlInit()
+                nv = pynvml
+            h = nv.nvmlDeviceGetHandleByIndex(0)
+            name = nv.nvmlDeviceGetName(h)
+            if isinstance(name, bytes):
+                name = name.decode("utf-8", "replace")
+            util = nv.nvmlDeviceGetUtilizationRates(h)
+            mem = nv.nvmlDeviceGetMemoryInfo(h)
+            temp = nv.nvmlDeviceGetTemperature(h, 0)
+            return f"{name}, {util.gpu}%, {int(mem.used/1e6)} MiB / {int(mem.total/1e6)} MiB, {temp}C"
+        except Exception:
+            pass
+
         if not shutil.which("nvidia-smi"):
             return "no nvidia-smi on PATH (GPU stats unavailable)"
         from ..utils.shell import run_command
